@@ -55,8 +55,8 @@ def register():
 	if request.method == 'POST' and form.validate():
 		name = form.name.data
 		email = form.email.data
-		username = form.email.data
-		password = sha256_crypt.encrypt(str(form.password.data))
+		username = form.username.data
+		password = sha256_crypt.hash(form.password.data)
 
 		conn = mariadb.connect(user="root",password="",database="articles")
 
@@ -66,10 +66,43 @@ def register():
 
 		conn.commit()
 		flash("You have Successfully registered with Us","success")
-		redirect(url_for('index'))
+		return redirect(url_for('index'))
 	else:
-		flash("Something went wrong , Try again","danger")
-	return render_template('index.html')
+		flash("Fill your details to register with Us ","warning")
+		return render_template('register.html',form=form)
+
+class loginform(Form):
+	username = StringField('Username',[validators.data_required(),validators.Length(min=4,max=50,message="Please Enter a valid Username")])
+	password = PasswordField('Password',[validators.data_required(),validators.Length(min=4,max=50,message="Enter a valid Password")])
+
+@app.route('/login',methods=['GET','POST'])
+def login():
+	form = loginform(request.form)
+	if request.method == 'POST' and form.validate():
+		username = form.username.data
+		pass_candidate = form.password.data 
+
+		con = mariadb.connect(user="root",password="",database="articles")
+
+		curs = con.cursor()
+
+		res = curs.execute("SELECT * FROM users WHERE username = %s",[username])
+		data = curs.fetchone()
+		passw = data[4]
+		app.logger.info(type(pass_candidate))
+		app.logger.info(type(passw))
+		app.logger.info(pass_candidate)
+		app.logger.info(passw)
+		app.logger.info(res)
+		if sha256_crypt.verify(str(pass_candidate),str(passw)):
+				app.logger.info(passw)
+				app.logger.info("Password Matched")
+		else:
+			app.logger.info(data)
+			app.logger.info(passw)
+			app.logger.info("No User Found")
+	return render_template('login.html',form=form)
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
