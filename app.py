@@ -6,6 +6,7 @@ from passlib.hash import sha256_crypt
 import mysql.connector as mariadb
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "secret"
 
 app.config['MySQL_HOST'] = 'localhost'
 app.config['MySQL_USER'] = 'root'
@@ -64,10 +65,8 @@ def register():
 		cur.execute("INSERT INTO users(name,email,username,password) VALUES(%s,%s,%s,%s)",(name,email,username,password))
 
 		conn.commit()
-
-
-
-		return render_template('register.html',form=form)
+		flash("You have Successfully register with Us","success")
+		redirect(url_for('index'))
 	return render_template('register.html',form=form)
 
 if __name__ == '__main__':
