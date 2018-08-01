@@ -65,9 +65,11 @@ def register():
 		cur.execute("INSERT INTO users(name,email,username,password) VALUES(%s,%s,%s,%s)",(name,email,username,password))
 
 		conn.commit()
-		flash("You have Successfully register with Us","success")
+		flash("You have Successfully registered with Us","success")
 		redirect(url_for('index'))
-	return render_template('register.html',form=form)
+	else:
+		flash("Something went wrong , Try again","danger")
+	return render_template('index.html')
 
 if __name__ == '__main__':
 	app.run(debug=True)
