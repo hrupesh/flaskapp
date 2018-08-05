@@ -3,7 +3,7 @@ from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form , StringField , TextAreaField , PasswordField , validators
 from passlib.hash import sha256_crypt
-import mysqldb.connector as mariadb
+import mysql.connector as mariadb
 
 app = Flask(__name__)
 
@@ -57,7 +57,15 @@ def register():
 		username = form.email.data
 		password = sha256_crypt.encrypt(str(form.password.data))
 
-		
+		conn = mariadb.connect(user="root",password="",database="articles")
+
+		cur = conn.cursor()
+
+		cur.execute("INSERT INTO users(name,email,username,password) VALUES(%s,%s,%s,%s)",(name,email,username,password))
+
+		conn.commit()
+
+
 
 		return render_template('register.html',form=form)
 	return render_template('register.html',form=form)
