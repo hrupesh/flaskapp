@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form , StringField , TextAreaField , PasswordField , validators
 from passlib.hash import sha256_crypt
 import mysql.connector as mariadb
+from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "secret"
@@ -23,6 +24,7 @@ Articles = Articles()
 
 @app.route('/')
 def index():
+		session['login'] = False
 		return render_template('index.html')
 
 @app.route('/about')
@@ -56,7 +58,7 @@ def register():
 		name = form.name.data
 		email = form.email.data
 		username = form.username.data
-		password = sha256_crypt.hash(form.password.data)
+		password = form.password.data
 
 		conn = mariadb.connect(user="root",password="",database="articles")
 
@@ -80,28 +82,78 @@ def login():
 	form = loginform(request.form)
 	if request.method == 'POST' and form.validate():
 		username = form.username.data
-		pass_candidate = form.password.data 
+		pass_candidate = form.password.data
 
 		con = mariadb.connect(user="root",password="",database="articles")
 
 		curs = con.cursor()
 
-		res = curs.execute("SELECT * FROM users WHERE username = %s",[username])
+		curs.execute("SELECT * FROM users WHERE username = %s",[username])
 		data = curs.fetchone()
 		passw = data[4]
-		app.logger.info(type(pass_candidate))
-		app.logger.info(type(passw))
-		app.logger.info(pass_candidate)
-		app.logger.info(passw)
-		app.logger.info(res)
-		if sha256_crypt.verify(str(pass_candidate),str(passw)):
-				app.logger.info(passw)
-				app.logger.info("Password Matched")
+		if pass_candidate == passw:
+				session['login'] = True
+				session['username'] = username
+				flash("You have successfully Logged in","success")
+				return redirect(url_for('dash'))
 		else:
-			app.logger.info(data)
-			app.logger.info(passw)
 			app.logger.info("No User Found")
+			flash("Incorrect Password","danger")
 	return render_template('login.html',form=form)
+
+def if_login(f):
+	@wraps(f)
+	def wrap(*args,**kwargs):
+		if session['login']:
+			return f(*args,**kwargs)
+		else:
+			flash("Unautharized section , please login ","danger")
+			return redirect(url_for('login'))
+	return wrap
+
+@app.route('/dash')
+@if_login
+def dash():
+	conn = mariadb.connect(user='root',password='',database='articles')
+	cur = conn.cursor()
+	cur.execute("select * from article;")
+	art = cur.fetchall()
+	app.logger.info(art)
+	return render_template('dash.html',articles=art)
+
+class articleform(Form):
+	title = StringField('Title',[validators.data_required(),validators.Length(min=4,max=50,message="Please Enter a valid Title of the article")])
+	body = TextAreaField('Body',[validators.data_required(),validators.Length(min=10,max=500,message="Enter Valid Body")])
+
+@app.route('/add_article',methods=['GET','POST'])
+@if_login
+def add_article():
+	form = articleform(request.form)
+	if request.method == 'POST' and form.validate():
+		title = form.title.data
+		body = form.body.data
+
+		connection = mariadb.connect(user='root',password='',database='articles')
+
+		cur = connection.cursor()
+
+		cur.execute("INSERT INTO article(title,body,author) VALUES( %s,%s,%s );",(title,body,session['username']))
+
+		connection.commit()
+
+		connection.close()
+		flash("Article Added","success")
+		return render_template('dash.html')
+	return render_template('add_article.html',form=form)
+
+
+@app.route('/logout')
+@if_login
+def logout():
+	session.clear()
+	session['login'] = False
+	flash("You have been Logged Out ","warning")
+	return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

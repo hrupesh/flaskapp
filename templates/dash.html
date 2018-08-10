@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% from 'includes/_formhelper.html' import render_field %}
+{% block body %}
+<div class="text-center">
+    <h1 class="mt-4" style="letter-spacing: 8px;">Welcome {{ session.username }}</h1>
+
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                    {% for article in articles %}
+                    <div class="card mb-2 mb-5">
+                        <div class="card-header text-center ">
+                            <a href="articles/{{article.id}}">
+                            {{ article[1] }}
+                        </a>
+                        </div>
+                        <div class="card-body text-center">
+                            {{ article[3] }}
+                        </div>
+                        <div class="card-footer inline">
+                            Author:{{ article[2] }}
+                            created-at:{{ article[4] }} 
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-sm-4 card bg-dark mb-5">
+                <a href="/add_article" class="btn btn-outline-primary mt-2 mb-2">Add Article</a>
+                <a href="/edit_article" class="btn btn-outline-warning mt-2 mb-2">Edit Article</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
