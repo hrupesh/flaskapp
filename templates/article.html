@@ -1,7 +1,12 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-
-    <h1>{{ Id }}</h1>
+    <div class="container card mt-5 bg-dark text-primary text-center">
+    <h1>{{ article[1] }}</h1>
+    <hr>
+    <h6>written by : {{ article[2] }} on {{ article[4] }}</h6>
+    <hr>
+    <h1>{{ article[3] | safe }}</h1>
+    </div>
 
 {% endblock %}

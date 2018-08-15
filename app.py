@@ -20,11 +20,18 @@ mysql = MySQL(app)
 
 Articles = Articles()
 
-
+def if_login(f):
+	@wraps(f)
+	def wrap(*args,**kwargs):
+		if session['login']:
+			return f(*args,**kwargs)
+		else:
+			flash("Unautharized section , please login ","danger")
+			return redirect(url_for('login'))
+	return wrap
 
 @app.route('/')
 def index():
-		session['login'] = False
 		return render_template('index.html')
 
 @app.route('/about')
@@ -32,12 +39,19 @@ def about():
 	return render_template('about.html')
 
 @app.route('/articles')
+@if_login
 def articles():
 	return render_template('articles.html',articles = Articles)
 
 @app.route('/articles/<string:id>/')
+@if_login
 def article(id):
-	return render_template('article.html',Id = id)
+	connn = mariadb.connect(user="root",password="",database="articles")
+	cur = connn.cursor()
+	cur.execute("select * from article where id=%s",[id])
+	article = cur.fetchone()
+	app.logger.info(article)
+	return render_template('article.html',article=article)
 
 
 class registerform(Form):
@@ -101,15 +115,7 @@ def login():
 			flash("Incorrect Password","danger")
 	return render_template('login.html',form=form)
 
-def if_login(f):
-	@wraps(f)
-	def wrap(*args,**kwargs):
-		if session['login']:
-			return f(*args,**kwargs)
-		else:
-			flash("Unautharized section , please login ","danger")
-			return redirect(url_for('login'))
-	return wrap
+
 
 @app.route('/dash')
 @if_login
@@ -118,7 +124,6 @@ def dash():
 	cur = conn.cursor()
 	cur.execute("select * from article;")
 	art = cur.fetchall()
-	app.logger.info(art)
 	return render_template('dash.html',articles=art)
 
 class articleform(Form):
@@ -143,7 +148,7 @@ def add_article():
 
 		connection.close()
 		flash("Article Added","success")
-		return render_template('dash.html')
+		return redirect(url_for('dash'))
 	return render_template('add_article.html',form=form)
 
 

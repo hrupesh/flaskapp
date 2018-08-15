@@ -10,16 +10,16 @@
                     {% for article in articles %}
                     <div class="card mb-2 mb-5">
                         <div class="card-header text-center ">
-                            <a href="articles/{{article.id}}">
+                            <a href="/articles/{{article[0]}}">
                             {{ article[1] }}
                         </a>
                         </div>
                         <div class="card-body text-center">
-                            {{ article[3] }}
+                            {{ article[3] | safe }}
                         </div>
                         <div class="card-footer inline">
-                            Author:{{ article[2] }}
-                            created-at:{{ article[4] }} 
+                            Author : {{ article[2] }}
+                            <small style="margin-left: 200px;">created-at : {{ article[4] }}</small> 
                         </div>
                     </div>
                 {% endfor %}
