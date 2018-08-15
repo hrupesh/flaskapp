@@ -53,6 +53,50 @@ def article(id):
 	app.logger.info(article)
 	return render_template('article.html',article=article)
 
+@app.route('/e/<string:id>',methods=['GET','POST'])
+@if_login
+def edit(id):
+	conn = mariadb.connect(user="root",password="",database="articles")
+	cur = conn.cursor()
+	cur.execute("select * from article where id=%s",[id])
+	article = cur.fetchone()
+	form = articleform(request.form)
+	form.title.data = article[1]
+	form.body.data = article[3]
+	app.logger.info(article)
+	cur.close()
+	conn.close()
+	if request.method == 'POST' and form.validate():
+		title = request.form['title']
+		body = request.form['body']
+		app.logger.info(title)
+		app.logger.info(body)
+		c = mariadb.connect(user='root',password='',database='articles')
+		cur = c.cursor()
+		cur.execute("update article set title=%s , body=%s where id=%s",(title,body,id))
+		c.commit()
+		cur.close()
+		c.close()
+		flash("Article Updated","success")
+		return redirect(url_for('dash'))
+	return render_template('edit_article.html',form=form)
+
+
+@app.route('/d/<string:id>',methods=['GET','POST'])
+@if_login
+def delete(id):
+	conn = mariadb.connect(user="root",password="",database="articles")
+	cur = conn.cursor()
+	cur.execute("select * from article where id=%s",[id])
+	article = cur.fetchone()
+	app.logger.info(article)
+	cur.execute("delete from article where id=%s",[id])
+	conn.commit()
+	flash("Article Deleted","danger")
+	cur.close()
+	conn.close()
+	return redirect(url_for('dash'))
+
 
 class registerform(Form):
 	name = StringField('Name',[validators.data_required() , validators.Length(min=4,max=50,message="ReEnter Name Between 4 and 50 characters")])
