@@ -1,6 +1,5 @@
 from flask import Flask ,  render_template ,request, redirect , flash , url_for , logging , session
 from data import Articles
-from flask_mysqldb import MySQL
 from wtforms import Form , StringField , TextAreaField , PasswordField , validators
 from passlib.hash import sha256_crypt
 import mysql.connector as mariadb
@@ -16,7 +15,6 @@ app.config['MySQL_HOST'] = 'localhost'
 app.config['MySQL_DB'] = 'articles'
 app.config['MySQL_CURSORCLASS'] = 'DictCursor'
 
-mysql = MySQL(app)
 
 Articles = Articles()
 
