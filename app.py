@@ -133,6 +133,7 @@ class loginform(Form):
 	username = StringField('Username',[validators.data_required(),validators.Length(min=4,max=50,message="Please Enter a valid Username")])
 	password = PasswordField('Password',[validators.data_required(),validators.Length(min=4,max=50,message="Enter a valid Password")])
 
+
 @app.route('/login',methods=['GET','POST'])
 def login():
 	form = loginform(request.form)
