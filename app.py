@@ -21,7 +21,7 @@ Articles = Articles()
 def if_login(f):
 	@wraps(f)
 	def wrap(*args,**kwargs):
-		if session['login']:
+		if session['login'] and session['username']:
 			return f(*args,**kwargs)
 		else:
 			flash("Unautharized section , please login ","danger")
@@ -65,6 +65,9 @@ def edit(id):
 	cur.close()
 	conn.close()
 	if request.method == 'POST' and form.validate():
+		if not session['username'] == article[2]:
+			flash("Access Denied , Only the owner of article can Edit the Article.","danger")
+			return redirect(url_for('dash'))
 		title = request.form['title']
 		body = request.form['body']
 		app.logger.info(title)
@@ -87,6 +90,9 @@ def delete(id):
 	cur = conn.cursor()
 	cur.execute("select * from article where id=%s",[id])
 	article = cur.fetchone()
+	if not session['username'] == article[2]:
+		flash("Access Dinied , you do not have requested Privelages.","danger")
+		return redirect(url_for('dash'))
 	app.logger.info(article)
 	cur.execute("delete from article where id=%s",[id])
 	conn.commit()
