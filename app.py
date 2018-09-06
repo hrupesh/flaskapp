@@ -10,7 +10,7 @@ app.config['SECRET_KEY'] = "secret"
 
 app.config['MySQL_HOST'] = 'localhost'
 app.config['MySQL_USER'] = 'root'
-app.config['MySQL_PASSWORD'] = 'toor'
+app.config['MySQL_PASSWORD'] = 'root'
 app.config['MySQL_HOST'] = 'localhost'
 app.config['MySQL_DB'] = 'articles'
 app.config['MySQL_CURSORCLASS'] = 'DictCursor'
@@ -44,7 +44,7 @@ def articles():
 @app.route('/articles/<string:id>/')
 @if_login
 def article(id):
-	connn = mariadb.connect(user="root",password="",database="articles")
+	connn = mariadb.connect(user="root",password="root",database="articles")
 	cur = connn.cursor()
 	cur.execute("select * from article where id=%s",[id])
 	article = cur.fetchone()
@@ -54,7 +54,7 @@ def article(id):
 @app.route('/e/<string:id>',methods=['GET','POST'])
 @if_login
 def edit(id):
-	conn = mariadb.connect(user="root",password="",database="articles")
+	conn = mariadb.connect(user="root",password="root",database="articles")
 	cur = conn.cursor()
 	cur.execute("select * from article where id=%s",[id])
 	article = cur.fetchone()
@@ -69,7 +69,7 @@ def edit(id):
 		body = request.form['body']
 		app.logger.info(title)
 		app.logger.info(body)
-		c = mariadb.connect(user='root',password='',database='articles')
+		c = mariadb.connect(user='root',password='root',database='articles')
 		cur = c.cursor()
 		cur.execute("update article set title=%s , body=%s where id=%s",(title,body,id))
 		c.commit()
@@ -83,7 +83,7 @@ def edit(id):
 @app.route('/d/<string:id>',methods=['GET','POST'])
 @if_login
 def delete(id):
-	conn = mariadb.connect(user="root",password="",database="articles")
+	conn = mariadb.connect(user="root",password="root",database="articles")
 	cur = conn.cursor()
 	cur.execute("select * from article where id=%s",[id])
 	article = cur.fetchone()
@@ -116,7 +116,7 @@ def register():
 		username = form.username.data
 		password = form.password.data
 
-		conn = mariadb.connect(user="root",password="",database="articles")
+		conn = mariadb.connect(user="root",password="root",database="articles")
 
 		cur = conn.cursor()
 
@@ -141,7 +141,7 @@ def login():
 		username = form.username.data
 		pass_candidate = form.password.data
 
-		con = mariadb.connect(user="root",password="",database="articles")
+		con = mariadb.connect(user="root",password="root",database="articles")
 
 		curs = con.cursor()
 
@@ -163,7 +163,7 @@ def login():
 @app.route('/dash')
 @if_login
 def dash():
-	conn = mariadb.connect(user='root',password='',database='articles')
+	conn = mariadb.connect(user='root',password='root',database='articles')
 	cur = conn.cursor()
 	cur.execute("select * from article;")
 	art = cur.fetchall()
@@ -181,7 +181,7 @@ def add_article():
 		title = form.title.data
 		body = form.body.data
 
-		connection = mariadb.connect(user='root',password='',database='articles')
+		connection = mariadb.connect(user='root',password='root',database='articles')
 
 		cur = connection.cursor()
 
@@ -205,4 +205,4 @@ def logout():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(debug=True,port=80,host='0.0.0.0')
