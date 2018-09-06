@@ -91,7 +91,7 @@ def delete(id):
 	cur.execute("select * from article where id=%s",[id])
 	article = cur.fetchone()
 	if not session['username'] == article[2]:
-		flash("Access Dinied , you do not have requested Privelages.","danger")
+		flash("Access Denied , you do not have requested Privelages.","danger")
 		return redirect(url_for('dash'))
 	app.logger.info(article)
 	cur.execute("delete from article where id=%s",[id])
